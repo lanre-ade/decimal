@@ -25,6 +25,7 @@ import (
 	"math/big"
 	"strconv"
 	"strings"
+	"github.com/vmihailenco/msgpack"
 )
 
 // DivisionPrecision is the number of decimal places in the result when it
@@ -927,6 +928,23 @@ func (d *Decimal) UnmarshalJSON(decimalBytes []byte) error {
 		return fmt.Errorf("Error decoding string '%s': %s", str, err)
 	}
 	return nil
+}
+
+func (d Decimal) EncodeMsgpack(enc *msgpack.Encoder) error {
+	data, err := d.MarshalBinary()
+	if err != nil {
+		return err
+	}
+    return enc.EncodeBytes(data)
+}
+
+func (d *Decimal) DecodeMsgpack(dec *msgpack.Decoder) error {
+    data, err := dec.DecodeBytes()
+    if err != nil {
+        return err
+    }
+    err = d.UnmarshalBinary(data)
+    return err
 }
 
 // MarshalJSON implements the json.Marshaler interface.
